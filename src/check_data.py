@@ -1,7 +1,12 @@
 """Этап 0: проверка, что данные Olist загружаются и пригодны для работы."""
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+# Windows выводит текст в системной кодировке (cp1251) — принудительно UTF-8,
+# иначе русский текст в консоли превращается в кракозябры
+sys.stdout.reconfigure(encoding="utf-8")
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
