@@ -18,10 +18,23 @@ python -m venv .venv
 .venv\Scripts\python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
 ```
 
-## Проверка данных
+## Запуск
+
+Пересчёт всех артефактов (по порядку), затем дашборд:
 
 ```powershell
-.venv\Scripts\python src\check_data.py
+.venv\Scripts\python src\prepare_data.py      # витрина продаж
+.venv\Scripts\python src\forecast_baseline.py # baseline-метрики
+.venv\Scripts\python src\forecast_prophet.py  # модель + прогноз на 28 дней
+.venv\Scripts\python src\trends.py            # тренды категорий
+.venv\Scripts\python src\recommend.py         # «покупают вместе»
+.venv\Scripts\streamlit run src\dashboard.py  # дашборд: http://localhost:8501
+```
+
+Тесты:
+
+```powershell
+.venv\Scripts\python -m pytest tests
 ```
 
 ## Этапы проекта
@@ -32,4 +45,4 @@ python -m venv .venv
 - [x] Этап 3 — модель прогноза (Prophet: MAPE 20.9% — лучше baseline на 3.1 п.п.)
 - [x] Этап 4 — аналитика трендов (рост категорий: 28 дней к предыдущим 28)
 - [x] Этап 5 — рекомендации «покупают вместе» (частые пары: confidence + lift)
-- [ ] Этап 6 — Streamlit-дашборд
+- [x] Этап 6 — Streamlit-дашборд (прогноз / тренды / рекомендации)

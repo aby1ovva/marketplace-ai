@@ -68,6 +68,12 @@ def main():
     fig.savefig(REPORTS_DIR / "figures" / "07_prophet_forecast.png", dpi=120)
     print("График: reports/figures/07_prophet_forecast.png")
 
+    # Прогноз в будущее (за пределы данных) — обучение на всём ряде, читает дашборд
+    future_fc = fit_and_forecast(daily, TEST_DAYS)
+    future_fc.round(1).to_csv(REPORTS_DIR / "forecast_future.csv")
+    daily.to_csv(REPORTS_DIR / "daily_history.csv")
+    print("Прогноз для дашборда: reports/forecast_future.csv")
+
 
 if __name__ == "__main__":
     main()
