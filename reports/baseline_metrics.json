@@ -1,0 +1,10 @@
+{
+  "naive_mean": {
+    "mape": 24.01,
+    "mae": 79.5
+  },
+  "seasonal_naive": {
+    "mape": 26.7,
+    "mae": 81.4
+  }
+}
