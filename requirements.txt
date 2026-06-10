@@ -2,3 +2,5 @@ pandas
 matplotlib
 jupyter
 kagglehub
+pytest
+prophet

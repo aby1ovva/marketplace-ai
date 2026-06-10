@@ -1,0 +1,73 @@
+"""Этап 3: прогноз дневных продаж моделью Prophet.
+
+Тренд + недельная и годовая сезонность + бразильские праздники.
+Сравнение с baseline из reports/baseline_metrics.json (этап 2).
+"""
+import json
+import logging
+import sys
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+from prophet import Prophet
+
+from forecast_baseline import TEST_DAYS, load_daily_series, mape
+
+REPORTS_DIR = Path(__file__).parent.parent / "reports"
+
+sys.stdout.reconfigure(encoding="utf-8")
+logging.getLogger("cmdstanpy").setLevel(logging.WARNING)
+
+
+def to_prophet_df(series):
+    """pd.Series с DatetimeIndex -> DataFrame формата Prophet (ds, y)."""
+    return series.rename_axis("ds").rename("y").reset_index()
+
+
+def fit_and_forecast(train, horizon):
+    model = Prophet(weekly_seasonality=True, yearly_seasonality=True, daily_seasonality=False)
+    model.add_country_holidays(country_name="BR")  # Black Friday и праздники — вывод EDA
+    model.fit(to_prophet_df(train))
+
+    future = model.make_future_dataframe(periods=horizon)
+    forecast = model.predict(future).tail(horizon)
+    return forecast.set_index("ds")[["yhat", "yhat_lower", "yhat_upper"]]
+
+
+def main():
+    daily = load_daily_series()
+    train, test = daily.iloc[:-TEST_DAYS], daily.iloc[-TEST_DAYS:]
+    print(f"Обучение: {train.index[0]:%Y-%m-%d} — {train.index[-1]:%Y-%m-%d}, проверка: {TEST_DAYS} дней")
+
+    forecast = fit_and_forecast(train, TEST_DAYS)
+
+    metrics = {"mape": round(mape(test, forecast["yhat"]), 2), "mae": round(float(abs(test - forecast["yhat"]).mean()), 1)}
+    baseline = json.loads((REPORTS_DIR / "baseline_metrics.json").read_text())
+    best_baseline = min(m["mape"] for m in baseline.values())
+
+    print(f"\nProphet:        MAPE = {metrics['mape']:.1f}%, MAE = {metrics['mae']:.0f} позиций/день")
+    print(f"Лучший baseline: MAPE = {best_baseline:.1f}%")
+    verdict = "ЛУЧШЕ baseline" if metrics["mape"] < best_baseline else "НЕ лучше baseline"
+    print(f"Вывод: Prophet {verdict} (разница {best_baseline - metrics['mape']:+.1f} п.п.)")
+
+    (REPORTS_DIR / "model_metrics.json").write_text(json.dumps({"prophet": metrics}, indent=2))
+
+    fig, ax = plt.subplots(figsize=(11, 5))
+    daily.iloc[-90:].plot(ax=ax, color="steelblue", label="Факт")
+    forecast["yhat"].plot(ax=ax, color="crimson", linewidth=1.8, label="Prophet")
+    ax.fill_between(forecast.index, forecast["yhat_lower"], forecast["yhat_upper"],
+                    color="crimson", alpha=0.15, label="Доверительный интервал")
+    ax.set_ylabel("Позиций в день")
+    ax.set_title(f"Prophet: прогноз на {TEST_DAYS} дней (MAPE {metrics['mape']:.1f}% vs baseline {best_baseline:.1f}%)")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(REPORTS_DIR / "figures" / "07_prophet_forecast.png", dpi=120)
+    print("График: reports/figures/07_prophet_forecast.png")
+
+
+if __name__ == "__main__":
+    main()
