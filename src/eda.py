@@ -1,0 +1,96 @@
+"""Этап 1: исследовательский анализ (EDA) витрины продаж.
+
+Строит графики в reports/figures/ и печатает ключевые выводы.
+"""
+import sys
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+
+DATA_PATH = Path(__file__).parent.parent / "data" / "processed" / "sales.csv"
+FIG_DIR = Path(__file__).parent.parent / "reports" / "figures"
+
+sys.stdout.reconfigure(encoding="utf-8")
+
+
+def save(fig, name):
+    fig.tight_layout()
+    fig.savefig(FIG_DIR / name, dpi=120)
+    plt.close(fig)
+    print(f"  график: reports/figures/{name}")
+
+
+def main():
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    sales = pd.read_csv(DATA_PATH, parse_dates=["date"])
+    sales["month"] = sales["date"].dt.to_period("M")
+
+    # 1. Продажи по месяцам (выручка и число позиций)
+    monthly = sales.groupby("month").agg(revenue=("price", "sum"), items=("order_id", "count"))
+    fig, ax1 = plt.subplots(figsize=(11, 5))
+    ax1.bar(monthly.index.astype(str), monthly["revenue"] / 1000, color="steelblue", label="Выручка, тыс. R$")
+    ax1.set_ylabel("Выручка, тыс. R$")
+    ax1.tick_params(axis="x", rotation=60)
+    ax2 = ax1.twinx()
+    ax2.plot(monthly.index.astype(str), monthly["items"], color="darkorange", marker="o", label="Позиций")
+    ax2.set_ylabel("Продано позиций")
+    ax1.set_title("Продажи по месяцам")
+    save(fig, "01_monthly_sales.png")
+
+    # 2. Топ-10 категорий по выручке
+    top_cats = sales.groupby("category")["price"].sum().nlargest(10) / 1000
+    fig, ax = plt.subplots(figsize=(9, 5))
+    top_cats.iloc[::-1].plot.barh(ax=ax, color="seagreen")
+    ax.set_xlabel("Выручка, тыс. R$")
+    ax.set_title("Топ-10 категорий по выручке")
+    save(fig, "02_top_categories.png")
+
+    # 3. Сезонность по дням недели
+    dow = sales.groupby(sales["date"].dt.dayofweek)["price"].count()
+    dow.index = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    fig, ax = plt.subplots(figsize=(8, 4))
+    dow.plot.bar(ax=ax, color="slateblue", rot=0)
+    ax.set_ylabel("Продано позиций")
+    ax.set_title("Продажи по дням недели")
+    save(fig, "03_day_of_week.png")
+
+    # 4. Дневной ряд продаж (основа будущего прогноза)
+    daily = sales.groupby("date")["price"].count()
+    fig, ax = plt.subplots(figsize=(11, 4))
+    daily.plot(ax=ax, color="steelblue", linewidth=0.8, label="Факт")
+    daily.rolling(7).mean().plot(ax=ax, color="crimson", linewidth=1.8, label="Среднее за 7 дней")
+    ax.set_ylabel("Позиций в день")
+    ax.set_title("Продажи по дням")
+    ax.legend()
+    save(fig, "04_daily_sales.png")
+
+    # 5. Динамика топ-5 категорий по месяцам
+    top5 = sales.groupby("category")["price"].sum().nlargest(5).index
+    pivot = sales[sales["category"].isin(top5)].pivot_table(
+        index="month", columns="category", values="price", aggfunc="count"
+    )
+    fig, ax = plt.subplots(figsize=(11, 5))
+    pivot.plot(ax=ax, marker=".")
+    ax.set_ylabel("Продано позиций")
+    ax.set_title("Динамика топ-5 категорий")
+    ax.tick_params(axis="x", rotation=60)
+    save(fig, "05_top5_dynamics.png")
+
+    # Ключевые цифры
+    print("\nКлючевые выводы:")
+    full_months = monthly[(monthly.index >= "2017-01") & (monthly.index <= "2018-08")]
+    growth = full_months["revenue"].iloc[-1] / full_months["revenue"].iloc[0]
+    print(f"- Рост выручки янв-2017 → авг-2018: x{growth:.1f}")
+    print(f"- Пиковый месяц: {monthly['revenue'].idxmax()} (R$ {monthly['revenue'].max():,.0f}) — Black Friday в ноябре")
+    print(f"- Топ-категория: {top_cats.index[0]} (R$ {top_cats.iloc[0]:,.0f} тыс.)")
+    print(f"- Самый активный день: {dow.idxmax()}, самый тихий: {dow.idxmin()}")
+    sparse = monthly[monthly["items"] < 100]
+    print(f"- Месяцев с <100 продаж (нерепрезентативные, убрать из обучения): {len(sparse)}: {list(sparse.index.astype(str))}")
+
+
+if __name__ == "__main__":
+    main()
