@@ -1,6 +1,8 @@
 """Этап 1: исследовательский анализ (EDA) витрины продаж.
 
 Строит графики в reports/figures/ и печатает ключевые выводы.
+Графики 01-03 показываются в дашборде и генерируются на двух языках
+(русский — без суффикса, английский — с суффиксом _en).
 """
 import sys
 from pathlib import Path
@@ -16,6 +18,33 @@ FIG_DIR = Path(__file__).parent.parent / "reports" / "figures"
 
 sys.stdout.reconfigure(encoding="utf-8")
 
+CHART_LABELS = {
+    "ru": {
+        "monthly_title": "Продажи по месяцам",
+        "monthly_revenue": "Выручка, тыс. R$",
+        "monthly_items": "Продано позиций",
+        "top_cats_title": "Топ-10 категорий по выручке",
+        "top_cats_x": "Выручка, тыс. R$",
+        "dow_title": "Продажи по дням недели",
+        "dow_y": "Продано позиций",
+        "dow_names": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+    },
+    "en": {
+        "monthly_title": "Monthly sales",
+        "monthly_revenue": "Revenue, thousand R$",
+        "monthly_items": "Items sold",
+        "top_cats_title": "Top 10 categories by revenue",
+        "top_cats_x": "Revenue, thousand R$",
+        "dow_title": "Sales by day of week",
+        "dow_y": "Items sold",
+        "dow_names": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    },
+}
+
+
+def fig_name(base, lang):
+    return f"{base}.png" if lang == "ru" else f"{base}_{lang}.png"
+
 
 def save(fig, name):
     fig.tight_layout()
@@ -29,34 +58,38 @@ def main():
     sales = pd.read_csv(DATA_PATH, parse_dates=["date"])
     sales["month"] = sales["date"].dt.to_period("M")
 
-    # 1. Продажи по месяцам (выручка и число позиций)
     monthly = sales.groupby("month").agg(revenue=("price", "sum"), items=("order_id", "count"))
-    fig, ax1 = plt.subplots(figsize=(11, 5))
-    ax1.bar(monthly.index.astype(str), monthly["revenue"] / 1000, color="steelblue", label="Выручка, тыс. R$")
-    ax1.set_ylabel("Выручка, тыс. R$")
-    ax1.tick_params(axis="x", rotation=60)
-    ax2 = ax1.twinx()
-    ax2.plot(monthly.index.astype(str), monthly["items"], color="darkorange", marker="o", label="Позиций")
-    ax2.set_ylabel("Продано позиций")
-    ax1.set_title("Продажи по месяцам")
-    save(fig, "01_monthly_sales.png")
-
-    # 2. Топ-10 категорий по выручке
     top_cats = sales.groupby("category")["price"].sum().nlargest(10) / 1000
-    fig, ax = plt.subplots(figsize=(9, 5))
-    top_cats.iloc[::-1].plot.barh(ax=ax, color="seagreen")
-    ax.set_xlabel("Выручка, тыс. R$")
-    ax.set_title("Топ-10 категорий по выручке")
-    save(fig, "02_top_categories.png")
-
-    # 3. Сезонность по дням недели
     dow = sales.groupby(sales["date"].dt.dayofweek)["price"].count()
-    dow.index = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-    fig, ax = plt.subplots(figsize=(8, 4))
-    dow.plot.bar(ax=ax, color="slateblue", rot=0)
-    ax.set_ylabel("Продано позиций")
-    ax.set_title("Продажи по дням недели")
-    save(fig, "03_day_of_week.png")
+
+    # Графики 1-3 — на двух языках (используются в дашборде)
+    for lang, L in CHART_LABELS.items():
+        # 1. Продажи по месяцам (выручка и число позиций)
+        fig, ax1 = plt.subplots(figsize=(11, 5))
+        ax1.bar(monthly.index.astype(str), monthly["revenue"] / 1000, color="steelblue")
+        ax1.set_ylabel(L["monthly_revenue"])
+        ax1.tick_params(axis="x", rotation=60)
+        ax2 = ax1.twinx()
+        ax2.plot(monthly.index.astype(str), monthly["items"], color="darkorange", marker="o")
+        ax2.set_ylabel(L["monthly_items"])
+        ax1.set_title(L["monthly_title"])
+        save(fig, fig_name("01_monthly_sales", lang))
+
+        # 2. Топ-10 категорий по выручке
+        fig, ax = plt.subplots(figsize=(9, 5))
+        top_cats.iloc[::-1].plot.barh(ax=ax, color="seagreen")
+        ax.set_xlabel(L["top_cats_x"])
+        ax.set_title(L["top_cats_title"])
+        save(fig, fig_name("02_top_categories", lang))
+
+        # 3. Сезонность по дням недели
+        dow_named = dow.copy()
+        dow_named.index = L["dow_names"]
+        fig, ax = plt.subplots(figsize=(8, 4))
+        dow_named.plot.bar(ax=ax, color="slateblue", rot=0)
+        ax.set_ylabel(L["dow_y"])
+        ax.set_title(L["dow_title"])
+        save(fig, fig_name("03_day_of_week", lang))
 
     # 4. Дневной ряд продаж (основа будущего прогноза)
     daily = sales.groupby("date")["price"].count()
@@ -82,12 +115,14 @@ def main():
 
     # Ключевые цифры
     print("\nКлючевые выводы:")
+    dow_ru = dow.copy()
+    dow_ru.index = CHART_LABELS["ru"]["dow_names"]
     full_months = monthly[(monthly.index >= "2017-01") & (monthly.index <= "2018-08")]
     growth = full_months["revenue"].iloc[-1] / full_months["revenue"].iloc[0]
     print(f"- Рост выручки янв-2017 → авг-2018: x{growth:.1f}")
     print(f"- Пиковый месяц: {monthly['revenue'].idxmax()} (R$ {monthly['revenue'].max():,.0f}) — Black Friday в ноябре")
     print(f"- Топ-категория: {top_cats.index[0]} (R$ {top_cats.iloc[0]:,.0f} тыс.)")
-    print(f"- Самый активный день: {dow.idxmax()}, самый тихий: {dow.idxmin()}")
+    print(f"- Самый активный день: {dow_ru.idxmax()}, самый тихий: {dow_ru.idxmin()}")
     sparse = monthly[monthly["items"] < 100]
     print(f"- Месяцев с <100 продаж (нерепрезентативные, убрать из обучения): {len(sparse)}: {list(sparse.index.astype(str))}")
 
