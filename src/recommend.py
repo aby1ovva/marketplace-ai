@@ -56,7 +56,7 @@ def top_recommendations(pair_stats, item, top_n=DEFAULT_TOP_N, min_lift=None):
     """Топ сопутствующих к `item`: чаще вместе -> выше confidence.
 
     min_lift: если задан, оставляем только пары с lift > min_lift.
-    Пока вызывается без порога — это шов для этапа 4.
+    Дашборд передаёт min_lift=LIFT_FLOOR (см. config); в CLI-режиме порог не применяется.
     """
     recs = pair_stats[pair_stats["item_a"] == item]
     if min_lift is not None:
@@ -92,7 +92,7 @@ def main():
 
     strong = cat_stats[(cat_stats["lift"] > STRONG_LIFT) & (cat_stats["together"] >= STRONG_MIN_TOGETHER)]
     top_rules = strong.sort_values("together", ascending=False).drop_duplicates("item_a").head(TOP_STRONG_RULES)
-    print("\nСильные связки категорий (lift > 2, неслучайные):")
+    print(f"\nСильные связки категорий (lift > {STRONG_LIFT}, неслучайные):")
     for _, r in top_rules.iterrows():
         print(
             f"  {r['item_a']:<28} -> {r['item_b']:<28} вместе {int(r['together']):>3} раз, "
