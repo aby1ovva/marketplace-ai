@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from config import DATA_PATH, DPI, FIG_DIR
+from config import DATA_PATH, DPI, FIG_DIR, FIG_DOW, FIG_MONTHLY, FIG_TOP_CATS
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -64,14 +64,14 @@ def _bilingual_charts(monthly, top_cats, dow):
         ax2.plot(monthly.index.astype(str), monthly["items"], color="darkorange", marker="o")
         ax2.set_ylabel(L["monthly_items"])
         ax1.set_title(L["monthly_title"])
-        save(fig, fig_name("01_monthly_sales", lang))
+        save(fig, fig_name(FIG_MONTHLY, lang))
 
         # 2. Топ-10 категорий по выручке
         fig, ax = plt.subplots(figsize=(9, 5))
         top_cats.iloc[::-1].plot.barh(ax=ax, color="seagreen")
         ax.set_xlabel(L["top_cats_x"])
         ax.set_title(L["top_cats_title"])
-        save(fig, fig_name("02_top_categories", lang))
+        save(fig, fig_name(FIG_TOP_CATS, lang))
 
         # 3. Сезонность по дням недели
         dow_named = dow.copy()
@@ -80,7 +80,7 @@ def _bilingual_charts(monthly, top_cats, dow):
         dow_named.plot.bar(ax=ax, color="slateblue", rot=0)
         ax.set_ylabel(L["dow_y"])
         ax.set_title(L["dow_title"])
-        save(fig, fig_name("03_day_of_week", lang))
+        save(fig, fig_name(FIG_DOW, lang))
 
 
 def _extra_charts(sales):

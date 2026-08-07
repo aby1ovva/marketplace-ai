@@ -41,3 +41,10 @@ RECS_PRODUCTS = "recs_products.csv"
 
 # Файлы, без которых дашборд не стартует
 DASHBOARD_REQUIRED = (FORECAST_FUTURE, DAILY_HISTORY, TRENDS_CSV, RECS_CATEGORIES)
+
+# Базовые имена графиков (без расширения; _en-версия — суффиксом).
+# Кросс-ссылаются генератором и дашбордом, поэтому вынесены в SSOT.
+FIG_MONTHLY = "01_monthly_sales"
+FIG_TOP_CATS = "02_top_categories"
+FIG_DOW = "03_day_of_week"
+FIG_PROPHET = "07_prophet_forecast"
