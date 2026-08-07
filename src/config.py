@@ -23,8 +23,7 @@ LANGS = ("ru", "en")
 DEFAULT_TOP_N = 5
 
 # --- Пороги рекомендаций (этап 5) ---
-MIN_TOGETHER_PRODUCTS = 3  # минимум совместных покупок для пар товаров
-MIN_TOGETHER_CATEGORIES = 10  # минимум для пар категорий
+MIN_TOGETHER_CATEGORIES = 10  # минимум совместных покупок для пар категорий
 LIFT_FLOOR = 1.0  # рекомендуем только пары с lift > LIFT_FLOOR (связь сильнее случайной, этап 4)
 STRONG_LIFT = 2  # lift > STRONG_LIFT => «сильная» связка (см. этап 4)
 STRONG_MIN_TOGETHER = 15  # и одновременно together >= этого порога
@@ -37,7 +36,6 @@ FORECAST_FUTURE = "forecast_future.csv"
 DAILY_HISTORY = "daily_history.csv"
 TRENDS_CSV = "trends.csv"
 RECS_CATEGORIES = "recs_categories.csv"
-RECS_PRODUCTS = "recs_products.csv"
 
 # Файлы, без которых дашборд не стартует
 DASHBOARD_REQUIRED = (FORECAST_FUTURE, DAILY_HISTORY, TRENDS_CSV, RECS_CATEGORIES)

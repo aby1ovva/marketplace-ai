@@ -36,9 +36,6 @@ def test_deterministic_pipeline_writes_expected_schemas(pipeline_dir, monkeypatc
     recs = pd.read_csv(reports / "recs_categories.csv")
     assert set(recs.columns) == {"item_a", "item_b", "together", "confidence", "lift"}
 
-    prods = pd.read_csv(reports / "recs_products.csv")
-    assert set(prods.columns) == {"item_a", "item_b", "together", "confidence", "lift"}
-
     metrics = json.loads((reports / "baseline_metrics.json").read_text(encoding="utf-8"))
     assert {"naive_mean", "seasonal_naive"} <= set(metrics)
     assert "mape" in metrics["naive_mean"]

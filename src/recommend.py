@@ -5,7 +5,7 @@
 - confidence — P(B в заказе | A в заказе)
 - lift       — насколько связь сильнее случайности (>1 = неслучайно)
 
-Результаты: reports/recs_products.csv и reports/recs_categories.csv.
+Результат: reports/recs_categories.csv (читается дашбордом).
 """
 
 import sys
@@ -17,9 +17,7 @@ from config import (
     DATA_PATH,
     DEFAULT_TOP_N,
     MIN_TOGETHER_CATEGORIES,
-    MIN_TOGETHER_PRODUCTS,
     RECS_CATEGORIES,
-    RECS_PRODUCTS,
     REPORTS_DIR,
     STRONG_LIFT,
     STRONG_MIN_TOGETHER,
@@ -74,13 +72,8 @@ def main():
         f"({len(multi_orders) / multi.size:.1%})"
     )
 
-    # Уровень товаров: только заказы с 2+ товарами, пары от 3 совместных покупок
+    # Корзины с 2+ товарами — основа парного анализа категорий.
     basket_sales = sales[sales["order_id"].isin(multi_orders.index)]
-    prod_stats = build_pair_stats(
-        basket_sales.rename(columns={"product_id": "item"})[["order_id", "item"]], min_together=MIN_TOGETHER_PRODUCTS
-    )
-    prod_stats.sort_values("together", ascending=False).to_csv(REPORTS_DIR / RECS_PRODUCTS, index=False)
-    print(f"Пар товаров (3+ совместные покупки): {len(prod_stats) // 2}")
 
     # Уровень категорий: читаемые правила для дашборда.
     # Вселенная для lift — только заказы с 2+ товарами: среди одиночных заказов
@@ -98,12 +91,6 @@ def main():
             f"  {r['item_a']:<28} -> {r['item_b']:<28} вместе {int(r['together']):>3} раз, "
             f"confidence {r['confidence']:.0%}, lift {r['lift']:.0f}"
         )
-
-    top_prod = prod_stats.sort_values("together", ascending=False).iloc[0]
-    print(
-        f"\nСамая частая пара товаров: {top_prod['item_a'][:8]}... + {top_prod['item_b'][:8]}... "
-        f"({int(top_prod['together'])} совместных заказов)"
-    )
 
 
 if __name__ == "__main__":
