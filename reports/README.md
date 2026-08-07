@@ -7,7 +7,7 @@ owning script.
 - `baseline_metrics.json`, `model_metrics.json` — forecast metrics.
 - `daily_history.csv`, `forecast_future.csv` — history + Prophet forecast.
 - `trends.csv` — category growth.
-- `recs_products.csv`, `recs_categories.csv` — bought-together pairs.
+- `recs_categories.csv` — bought-together category pairs.
 - `figures/*.png` — charts (`07_prophet_forecast` and `08_trends` are embedded in the
   root README as demos).
 

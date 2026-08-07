@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Dependabot (weekly pip + GitHub Actions updates) and a `pip-audit` CI job.
+- Smoke test for the raw-data sanity script (`check_data.py`).
+
+### Changed
+- Centralized cross-referenced figure names in `config.py`; README declares maintenance status.
+
+### Removed
+- `recs_products.csv` (product-level pairs) — generated but never consumed by the dashboard.
+
 ## [0.1.0] - 2026-08-07
 
 First tagged release. Bundles the original demo with a full reproducibility,

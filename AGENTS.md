@@ -23,7 +23,7 @@ Scripts run in this order (each reads `data/processed/sales.csv` and/or `reports
 3. `forecast_prophet.py` → `reports/model_metrics.json`, `forecast_future.csv`,
    `daily_history.csv`, `figures/07_prophet_forecast*.png`.
 4. `trends.py` → `reports/trends.csv`, `figures/08_trends.png`.
-5. `recommend.py` → `reports/recs_products.csv`, `reports/recs_categories.csv`.
+5. `recommend.py` → `reports/recs_categories.csv`.
 6. `dashboard.py` (Streamlit) → reads pre-computed `reports/`, trains nothing.
 
 `make run-pipeline` runs steps 1–5 headless; `make run-dashboard` launches the UI.
@@ -76,6 +76,4 @@ Treat them as a generated cache: regenerate ONLY by re-running the owning script
 
 - GitHub **Issues are enabled** — open one for scope or acceptance questions.
 - Project convention: quiz/question text in **English**, explanations in **Russian**.
-- `reports/recs_products.csv` is generated but NOT read by the dashboard
-  (wired-but-unused; keeping or dropping the product level is an owner decision).
 - More context: `docs/product-context.md`, `docs/context-map.md`, `docs/decisions/`.

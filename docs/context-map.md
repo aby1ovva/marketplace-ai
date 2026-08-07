@@ -8,8 +8,7 @@
 
 ## Заметки
 
-- `recs_products.csv` генерируется `recommend.py`, но дашборд его НЕ читает
-  (wired-but-unused; решение о товарном уровне — за владельцем).
-- Не покрыто тестами: `check_data.py` (0%, одноразовый sanity-скрипт на raw-данных),
-  I/O-обвязка `prepare_data.main` / `forecast_prophet.main` (логика покрыта отдельно).
+- `recommend.py` считает только категорийные пары (`recs_categories.csv`); товарный
+  уровень (`recs_products.csv`) убран как неиспользуемый дашбордом.
+- Слабое покрытие: I/O-обёртка `prepare_data.main` (логика `build_sales_mart` покрыта отдельно).
 - Все константы — в `src/config.py` (единый источник истины).
