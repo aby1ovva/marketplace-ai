@@ -4,7 +4,6 @@
 Результаты: reports/trends.csv + график топов роста/падения.
 """
 import sys
-from pathlib import Path
 
 import matplotlib
 
@@ -12,9 +11,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from forecast_baseline import DATA_PATH, SERIES_END
-
-REPORTS_DIR = Path(__file__).parent.parent / "reports"
+from config import DATA_PATH, DPI, FIG_DIR, REPORTS_DIR, TRENDS_CSV
+from forecast_baseline import SERIES_END
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -47,7 +45,7 @@ def main():
     sales = pd.read_csv(DATA_PATH, parse_dates=["date"])
     growth = compute_category_growth(sales, end=SERIES_END)
 
-    growth.to_csv(REPORTS_DIR / "trends.csv", index=False)
+    growth.to_csv(REPORTS_DIR / TRENDS_CSV, index=False)
 
     rising, falling = growth.head(10), growth.tail(10)
     print(f"Период: последние 28 дней до {SERIES_END} vs предыдущие 28 дней")
@@ -67,7 +65,7 @@ def main():
     ax.set_xlabel("Рост продаж, % (28 дней к предыдущим 28)")
     ax.set_title("Лидеры и отстающие по росту продаж")
     fig.tight_layout()
-    fig.savefig(REPORTS_DIR / "figures" / "08_trends.png", dpi=120)
+    fig.savefig(FIG_DIR / "08_trends.png", dpi=DPI)
     print("\nГрафик: reports/figures/08_trends.png")
     print("Таблица: reports/trends.csv")
 

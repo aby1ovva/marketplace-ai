@@ -9,13 +9,21 @@
 """
 import sys
 from itertools import combinations
-from pathlib import Path
 
 import pandas as pd
 
-from forecast_baseline import DATA_PATH
-
-REPORTS_DIR = Path(__file__).parent.parent / "reports"
+from config import (
+    DATA_PATH,
+    DEFAULT_TOP_N,
+    MIN_TOGETHER_CATEGORIES,
+    MIN_TOGETHER_PRODUCTS,
+    RECS_CATEGORIES,
+    RECS_PRODUCTS,
+    REPORTS_DIR,
+    STRONG_LIFT,
+    STRONG_MIN_TOGETHER,
+    TOP_STRONG_RULES,
+)
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -44,9 +52,15 @@ def build_pair_stats(baskets, min_together=1):
     return pd.DataFrame(rows, columns=["item_a", "item_b", "together", "confidence", "lift"])
 
 
-def recommend(pair_stats, item, top_n=5):
-    """Топ сопутствующих к `item`: чаще вместе -> выше confidence."""
+def top_recommendations(pair_stats, item, top_n=DEFAULT_TOP_N, min_lift=None):
+    """Топ сопутствующих к `item`: чаще вместе -> выше confidence.
+
+    min_lift: если задан, оставляем только пары с lift > min_lift.
+    Пока вызывается без порога — это шов для этапа 4.
+    """
     recs = pair_stats[pair_stats["item_a"] == item]
+    if min_lift is not None:
+        recs = recs[recs["lift"] > min_lift]
     return recs.sort_values(["together", "confidence"], ascending=False).head(top_n)
 
 
@@ -61,21 +75,21 @@ def main():
     # Уровень товаров: только заказы с 2+ товарами, пары от 3 совместных покупок
     basket_sales = sales[sales["order_id"].isin(multi_orders.index)]
     prod_stats = build_pair_stats(
-        basket_sales.rename(columns={"product_id": "item"})[["order_id", "item"]], min_together=3
+        basket_sales.rename(columns={"product_id": "item"})[["order_id", "item"]], min_together=MIN_TOGETHER_PRODUCTS
     )
-    prod_stats.sort_values("together", ascending=False).to_csv(REPORTS_DIR / "recs_products.csv", index=False)
+    prod_stats.sort_values("together", ascending=False).to_csv(REPORTS_DIR / RECS_PRODUCTS, index=False)
     print(f"Пар товаров (3+ совместные покупки): {len(prod_stats) // 2}")
 
     # Уровень категорий: читаемые правила для дашборда.
     # Вселенная для lift — только заказы с 2+ товарами: среди одиночных заказов
     # совместная покупка невозможна, и lift по всем заказам всегда был бы < 1.
     cat_stats = build_pair_stats(
-        basket_sales.rename(columns={"category": "item"})[["order_id", "item"]], min_together=10
+        basket_sales.rename(columns={"category": "item"})[["order_id", "item"]], min_together=MIN_TOGETHER_CATEGORIES
     )
-    cat_stats.sort_values("together", ascending=False).to_csv(REPORTS_DIR / "recs_categories.csv", index=False)
+    cat_stats.sort_values("together", ascending=False).to_csv(REPORTS_DIR / RECS_CATEGORIES, index=False)
 
-    strong = cat_stats[(cat_stats["lift"] > 2) & (cat_stats["together"] >= 15)]
-    top_rules = strong.sort_values("together", ascending=False).drop_duplicates("item_a").head(8)
+    strong = cat_stats[(cat_stats["lift"] > STRONG_LIFT) & (cat_stats["together"] >= STRONG_MIN_TOGETHER)]
+    top_rules = strong.sort_values("together", ascending=False).drop_duplicates("item_a").head(TOP_STRONG_RULES)
     print("\nСильные связки категорий (lift > 2, неслучайные):")
     for _, r in top_rules.iterrows():
         print(f"  {r['item_a']:<28} -> {r['item_b']:<28} вместе {int(r['together']):>3} раз, "

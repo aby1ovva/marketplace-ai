@@ -5,15 +5,12 @@
 Перед запуском прогнать: prepare_data.py, forecast_prophet.py, trends.py, recommend.py.
 Все тексты интерфейса — в i18n.py (переключатель RU/EN вверху страницы).
 """
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
 
+from config import DASHBOARD_REQUIRED, DEFAULT_TOP_N, FIG_DIR, LANGS, REPORTS_DIR
 from i18n import category_name, t
-
-REPORTS_DIR = Path(__file__).parent.parent / "reports"
-FIG_DIR = REPORTS_DIR / "figures"
+from recommend import top_recommendations
 
 
 def fig_path(base, lang):
@@ -23,7 +20,7 @@ def fig_path(base, lang):
 st.set_page_config(page_title="Marketplace AI", page_icon="🛍️", layout="wide")
 
 title_col, lang_col = st.columns([5, 1])
-lang = lang_col.radio("Language", ["ru", "en"], horizontal=True, label_visibility="collapsed",
+lang = lang_col.radio("Language", list(LANGS), horizontal=True, label_visibility="collapsed",
                       format_func=lambda code: {"ru": "🇷🇺 Рус", "en": "🇬🇧 Eng"}[code])
 title_col.title(t("app_title", lang))
 st.markdown(t("app_intro", lang))
@@ -34,8 +31,7 @@ def load_csv(name, **kwargs):
     return pd.read_csv(REPORTS_DIR / name, **kwargs)
 
 
-missing = [f for f in ["forecast_future.csv", "daily_history.csv", "trends.csv", "recs_categories.csv"]
-           if not (REPORTS_DIR / f).exists()]
+missing = [f for f in DASHBOARD_REQUIRED if not (REPORTS_DIR / f).exists()]
 if missing:
     st.error(t("error_missing", lang, files=missing))
     st.stop()
@@ -119,8 +115,7 @@ with tab_recs:
 
     category = st.selectbox(t("recs_select", lang), sorted(recs["item_a"].unique()),
                             format_func=lambda c: category_name(c, lang))
-    top = (recs[recs["item_a"] == category]
-           .sort_values(["together", "confidence"], ascending=False).head(5)
+    top = (top_recommendations(recs, category, top_n=DEFAULT_TOP_N)
            .assign(**{
                t("col_recommend", lang): lambda df: df["item_b"].map(lambda c: category_name(c, lang)),
                t("col_together", lang): lambda df: df["together"].astype(int),

@@ -5,7 +5,6 @@
 (русский — без суффикса, английский — с суффиксом _en).
 """
 import sys
-from pathlib import Path
 
 import matplotlib
 
@@ -13,8 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "processed" / "sales.csv"
-FIG_DIR = Path(__file__).parent.parent / "reports" / "figures"
+from config import DATA_PATH, DPI, FIG_DIR
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -48,7 +46,7 @@ def fig_name(base, lang):
 
 def save(fig, name):
     fig.tight_layout()
-    fig.savefig(FIG_DIR / name, dpi=120)
+    fig.savefig(FIG_DIR / name, dpi=DPI)
     plt.close(fig)
     print(f"  график: reports/figures/{name}")
 
@@ -120,11 +118,13 @@ def main():
     full_months = monthly[(monthly.index >= "2017-01") & (monthly.index <= "2018-08")]
     growth = full_months["revenue"].iloc[-1] / full_months["revenue"].iloc[0]
     print(f"- Рост выручки янв-2017 → авг-2018: x{growth:.1f}")
-    print(f"- Пиковый месяц: {monthly['revenue'].idxmax()} (R$ {monthly['revenue'].max():,.0f}) — Black Friday в ноябре")
+    peak = f"{monthly['revenue'].idxmax()} (R$ {monthly['revenue'].max():,.0f})"
+    print(f"- Пиковый месяц: {peak} — Black Friday в ноябре")
     print(f"- Топ-категория: {top_cats.index[0]} (R$ {top_cats.iloc[0]:,.0f} тыс.)")
     print(f"- Самый активный день: {dow_ru.idxmax()}, самый тихий: {dow_ru.idxmin()}")
     sparse = monthly[monthly["items"] < 100]
-    print(f"- Месяцев с <100 продаж (нерепрезентативные, убрать из обучения): {len(sparse)}: {list(sparse.index.astype(str))}")
+    sparse_months = list(sparse.index.astype(str))
+    print(f"- Месяцев с <100 продаж (нерепрезентативные, убрать из обучения): {len(sparse)}: {sparse_months}")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,6 @@
 """
 import json
 import sys
-from pathlib import Path
 
 import matplotlib
 
@@ -16,8 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "processed" / "sales.csv"
-REPORTS_DIR = Path(__file__).parent.parent / "reports"
+from config import BASELINE_METRICS, DATA_PATH, DPI, FIG_DIR, REPORTS_DIR
 
 TRAIN_START = "2017-01-01"   # 2016 почти пустой — исключаем (вывод EDA)
 SERIES_END = "2018-08-22"    # последние дни датасета неполные — обрезаем
@@ -75,7 +73,7 @@ def main():
         print(f"{name:>15}: MAPE = {metrics[name]['mape']:.1f}%, MAE = {metrics[name]['mae']:.0f} позиций/день")
 
     REPORTS_DIR.mkdir(exist_ok=True)
-    (REPORTS_DIR / "baseline_metrics.json").write_text(json.dumps(metrics, indent=2))
+    (REPORTS_DIR / BASELINE_METRICS).write_text(json.dumps(metrics, indent=2))
     print("\nМетрики сохранены: reports/baseline_metrics.json")
 
     fig, ax = plt.subplots(figsize=(11, 5))
@@ -86,7 +84,7 @@ def main():
     ax.set_title(f"Baseline-прогноз на {TEST_DAYS} дней")
     ax.legend()
     fig.tight_layout()
-    fig.savefig(REPORTS_DIR / "figures" / "06_baseline_forecast.png", dpi=120)
+    fig.savefig(FIG_DIR / "06_baseline_forecast.png", dpi=DPI)
     print("График: reports/figures/06_baseline_forecast.png")
 
 

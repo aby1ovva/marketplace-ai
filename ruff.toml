@@ -1,8 +1,10 @@
-# Ruff config. This is a stub: line length matches the current code so `make lint`
-# and `make format` work without churning the diff. Stage 2 widens the rule set
-# (W, UP) and runs the actual format/fix sweep over the 58 long lines.
+# Ruff config for marketplace-ai.
 line-length = 120
 target-version = "py313"
 
 [lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "W", "UP"]
+
+[lint.per-file-ignores]
+# i18n.py holds long user-facing RU/EN copy and markdown tables — kept intact.
+"src/i18n.py" = ["E501"]
