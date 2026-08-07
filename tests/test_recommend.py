@@ -1,4 +1,5 @@
 """Тесты рекомендаций «покупают вместе» (этап 5)."""
+
 import sys
 from pathlib import Path
 
@@ -11,10 +12,12 @@ from recommend import build_pair_stats, top_recommendations
 
 def make_baskets():
     """4 заказа: A+B вместе дважды, A+C один раз, D всегда один."""
-    return pd.DataFrame({
-        "order_id": ["o1", "o1", "o2", "o2", "o3", "o3", "o4"],
-        "item":     ["A",  "B",  "A",  "B",  "A",  "C",  "D"],
-    })
+    return pd.DataFrame(
+        {
+            "order_id": ["o1", "o1", "o2", "o2", "o3", "o3", "o4"],
+            "item": ["A", "B", "A", "B", "A", "C", "D"],
+        }
+    )
 
 
 def test_pair_counts():

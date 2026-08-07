@@ -4,6 +4,7 @@
 Колонки: date | order_id | product_id | category | price
 Только доставленные заказы (delivered), категории переведены на английский.
 """
+
 import sys
 
 import pandas as pd

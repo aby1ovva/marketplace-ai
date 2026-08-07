@@ -1,4 +1,5 @@
 """Тесты локализации (RU/EN)."""
+
 import sys
 from pathlib import Path
 

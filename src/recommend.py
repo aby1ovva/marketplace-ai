@@ -7,6 +7,7 @@
 
 Результаты: reports/recs_products.csv и reports/recs_categories.csv.
 """
+
 import sys
 from itertools import combinations
 
@@ -46,8 +47,7 @@ def build_pair_stats(baskets, min_together=1):
         for x, y in [(a, b), (b, a)]:
             confidence = together / item_orders[x]
             lift = confidence / (item_orders[y] / n_orders)
-            rows.append({"item_a": x, "item_b": y, "together": together,
-                         "confidence": confidence, "lift": lift})
+            rows.append({"item_a": x, "item_b": y, "together": together, "confidence": confidence, "lift": lift})
 
     return pd.DataFrame(rows, columns=["item_a", "item_b", "together", "confidence", "lift"])
 
@@ -69,8 +69,10 @@ def main():
 
     multi = sales.groupby("order_id")["product_id"].nunique()
     multi_orders = multi[multi >= 2]
-    print(f"Заказов всего: {multi.size:,}, из них с 2+ разными товарами: {len(multi_orders):,} "
-          f"({len(multi_orders) / multi.size:.1%})")
+    print(
+        f"Заказов всего: {multi.size:,}, из них с 2+ разными товарами: {len(multi_orders):,} "
+        f"({len(multi_orders) / multi.size:.1%})"
+    )
 
     # Уровень товаров: только заказы с 2+ товарами, пары от 3 совместных покупок
     basket_sales = sales[sales["order_id"].isin(multi_orders.index)]
@@ -92,12 +94,16 @@ def main():
     top_rules = strong.sort_values("together", ascending=False).drop_duplicates("item_a").head(TOP_STRONG_RULES)
     print("\nСильные связки категорий (lift > 2, неслучайные):")
     for _, r in top_rules.iterrows():
-        print(f"  {r['item_a']:<28} -> {r['item_b']:<28} вместе {int(r['together']):>3} раз, "
-              f"confidence {r['confidence']:.0%}, lift {r['lift']:.0f}")
+        print(
+            f"  {r['item_a']:<28} -> {r['item_b']:<28} вместе {int(r['together']):>3} раз, "
+            f"confidence {r['confidence']:.0%}, lift {r['lift']:.0f}"
+        )
 
     top_prod = prod_stats.sort_values("together", ascending=False).iloc[0]
-    print(f"\nСамая частая пара товаров: {top_prod['item_a'][:8]}... + {top_prod['item_b'][:8]}... "
-          f"({int(top_prod['together'])} совместных заказов)")
+    print(
+        f"\nСамая частая пара товаров: {top_prod['item_a'][:8]}... + {top_prod['item_b'][:8]}... "
+        f"({int(top_prod['together'])} совместных заказов)"
+    )
 
 
 if __name__ == "__main__":

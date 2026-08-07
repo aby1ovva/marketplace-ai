@@ -3,6 +3,7 @@
 Тренд + недельная и годовая сезонность + бразильские праздники.
 Сравнение с baseline из reports/baseline_metrics.json (этап 2).
 """
+
 import json
 import logging
 import sys
@@ -42,8 +43,10 @@ def main():
 
     forecast = fit_and_forecast(train, TEST_DAYS)
 
-    metrics = {"mape": round(mape(test, forecast["yhat"]), 2),
-               "mae": round(float(abs(test - forecast["yhat"]).mean()), 1)}
+    metrics = {
+        "mape": round(mape(test, forecast["yhat"]), 2),
+        "mae": round(float(abs(test - forecast["yhat"]).mean()), 1),
+    }
     baseline = json.loads((REPORTS_DIR / BASELINE_METRICS).read_text())
     best_baseline = min(m["mape"] for m in baseline.values())
 
@@ -57,19 +60,33 @@ def main():
     # График валидации — на двух языках (показывается в дашборде)
     mape_note = f"(MAPE {metrics['mape']:.1f}% vs baseline {best_baseline:.1f}%)"
     chart_labels = {
-        "ru": {"fact": "Факт", "interval": "Доверительный интервал", "y": "Позиций в день",
-               "title": f"Prophet: прогноз на {TEST_DAYS} дней {mape_note}",
-               "file": "07_prophet_forecast.png"},
-        "en": {"fact": "Actual", "interval": "Confidence interval", "y": "Items per day",
-               "title": f"Prophet: {TEST_DAYS}-day forecast {mape_note}",
-               "file": "07_prophet_forecast_en.png"},
+        "ru": {
+            "fact": "Факт",
+            "interval": "Доверительный интервал",
+            "y": "Позиций в день",
+            "title": f"Prophet: прогноз на {TEST_DAYS} дней {mape_note}",
+            "file": "07_prophet_forecast.png",
+        },
+        "en": {
+            "fact": "Actual",
+            "interval": "Confidence interval",
+            "y": "Items per day",
+            "title": f"Prophet: {TEST_DAYS}-day forecast {mape_note}",
+            "file": "07_prophet_forecast_en.png",
+        },
     }
     for L in chart_labels.values():
         fig, ax = plt.subplots(figsize=(11, 5))
         daily.iloc[-90:].plot(ax=ax, color="steelblue", label=L["fact"])
         forecast["yhat"].plot(ax=ax, color="crimson", linewidth=1.8, label="Prophet")
-        ax.fill_between(forecast.index, forecast["yhat_lower"], forecast["yhat_upper"],
-                        color="crimson", alpha=0.15, label=L["interval"])
+        ax.fill_between(
+            forecast.index,
+            forecast["yhat_lower"],
+            forecast["yhat_upper"],
+            color="crimson",
+            alpha=0.15,
+            label=L["interval"],
+        )
         ax.set_ylabel(L["y"])
         ax.set_title(L["title"])
         ax.legend()

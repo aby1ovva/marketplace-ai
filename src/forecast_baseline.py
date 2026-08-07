@@ -6,6 +6,7 @@
 
 Метрики сохраняются в reports/baseline_metrics.json — планка для этапа 3.
 """
+
 import json
 import sys
 
@@ -17,9 +18,9 @@ import pandas as pd
 
 from config import BASELINE_METRICS, DATA_PATH, DPI, FIG_DIR, REPORTS_DIR
 
-TRAIN_START = "2017-01-01"   # 2016 почти пустой — исключаем (вывод EDA)
-SERIES_END = "2018-08-22"    # последние дни датасета неполные — обрезаем
-TEST_DAYS = 28               # горизонт проверки — 4 недели
+TRAIN_START = "2017-01-01"  # 2016 почти пустой — исключаем (вывод EDA)
+SERIES_END = "2018-08-22"  # последние дни датасета неполные — обрезаем
+TEST_DAYS = 28  # горизонт проверки — 4 недели
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -44,7 +45,7 @@ def naive_mean_forecast(series, horizon, window=28):
 
 def seasonal_naive_forecast(series, horizon, weeks=4):
     """Прогноз = среднее по тому же дню недели за последние `weeks` недель."""
-    tail = series.iloc[-weeks * 7:]
+    tail = series.iloc[-weeks * 7 :]
     by_weekday = tail.groupby(tail.index.dayofweek).mean()
     idx = future_index(series, horizon)
     return pd.Series([by_weekday[d.dayofweek] for d in idx], index=idx)

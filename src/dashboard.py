@@ -5,6 +5,7 @@
 Перед запуском прогнать: prepare_data.py, forecast_prophet.py, trends.py, recommend.py.
 Все тексты интерфейса — в i18n.py (переключатель RU/EN вверху страницы).
 """
+
 import pandas as pd
 import streamlit as st
 
@@ -20,8 +21,13 @@ def fig_path(base, lang):
 st.set_page_config(page_title="Marketplace AI", page_icon="🛍️", layout="wide")
 
 title_col, lang_col = st.columns([5, 1])
-lang = lang_col.radio("Language", list(LANGS), horizontal=True, label_visibility="collapsed",
-                      format_func=lambda code: {"ru": "🇷🇺 Рус", "en": "🇬🇧 Eng"}[code])
+lang = lang_col.radio(
+    "Language",
+    list(LANGS),
+    horizontal=True,
+    label_visibility="collapsed",
+    format_func=lambda code: {"ru": "🇷🇺 Рус", "en": "🇬🇧 Eng"}[code],
+)
 title_col.title(t("app_title", lang))
 st.markdown(t("app_intro", lang))
 
@@ -70,28 +76,38 @@ with tab_forecast:
 
     col1, col2, col3 = st.columns(3)
     delta_pct = (forecast["yhat"].mean() / history.iloc[-28:].mean() - 1) * 100
-    col1.metric(t("metric_forecast_label", lang),
-                t("metric_forecast_value", lang, n=f"{forecast['yhat'].mean():.0f}"),
-                t("metric_forecast_delta", lang, pct=f"{delta_pct:+.0f}"))
+    col1.metric(
+        t("metric_forecast_label", lang),
+        t("metric_forecast_value", lang, n=f"{forecast['yhat'].mean():.0f}"),
+        t("metric_forecast_delta", lang, pct=f"{delta_pct:+.0f}"),
+    )
     col2.metric(t("metric_error_label", lang), t("metric_error_value", lang), t("metric_error_delta", lang))
     col3.metric(t("metric_history_label", lang), t("metric_history_value", lang, n=len(history)))
 
     days_back = st.slider(t("slider_label", lang), 30, len(history), 120)
-    chart_df = pd.DataFrame({t("legend_fact", lang): history.iloc[-days_back:],
-                             t("legend_forecast", lang): forecast["yhat"]})
+    chart_df = pd.DataFrame(
+        {t("legend_fact", lang): history.iloc[-days_back:], t("legend_forecast", lang): forecast["yhat"]}
+    )
     st.line_chart(chart_df, height=380)
     with st.expander(t("expander_table", lang)):
         st.caption(t("expander_caption", lang))
-        st.dataframe(forecast.rename(columns={"yhat": t("col_forecast", lang),
-                                              "yhat_lower": t("col_min", lang),
-                                              "yhat_upper": t("col_max", lang)}))
+        st.dataframe(
+            forecast.rename(
+                columns={
+                    "yhat": t("col_forecast", lang),
+                    "yhat_lower": t("col_min", lang),
+                    "yhat_upper": t("col_max", lang),
+                }
+            )
+        )
 
 # ---------- Тренды ----------
 with tab_trends:
     trends = load_csv("trends.csv")
     trends[t("col_category", lang)] = trends["category"].map(lambda c: category_name(c, lang))
-    show = trends.rename(columns={"prev": t("col_prev", lang), "last": t("col_last", lang),
-                                  "growth_pct": t("col_growth", lang)})
+    show = trends.rename(
+        columns={"prev": t("col_prev", lang), "last": t("col_last", lang), "growth_pct": t("col_growth", lang)}
+    )
 
     st.subheader(t("trends_header", lang))
     st.info(t("trends_info", lang))
@@ -103,8 +119,12 @@ with tab_trends:
     col2.markdown(t("trends_lagging", lang))
     col2.dataframe(show.tail(10).iloc[::-1][cols].set_index(t("col_category", lang)), width="stretch")
 
-    st.bar_chart(show.set_index(t("col_category", lang))[t("col_growth", lang)], height=380,
-                 x_label=t("trends_chart_x", lang), y_label=t("trends_chart_y", lang))
+    st.bar_chart(
+        show.set_index(t("col_category", lang))[t("col_growth", lang)],
+        height=380,
+        x_label=t("trends_chart_x", lang),
+        y_label=t("trends_chart_y", lang),
+    )
 
 # ---------- Рекомендации ----------
 with tab_recs:
@@ -113,25 +133,31 @@ with tab_recs:
     st.subheader(t("recs_header", lang))
     st.info(t("recs_info", lang))
 
-    category = st.selectbox(t("recs_select", lang), sorted(recs["item_a"].unique()),
-                            format_func=lambda c: category_name(c, lang))
-    top = (top_recommendations(recs, category, top_n=DEFAULT_TOP_N)
-           .assign(**{
-               t("col_recommend", lang): lambda df: df["item_b"].map(lambda c: category_name(c, lang)),
-               t("col_together", lang): lambda df: df["together"].astype(int),
-               t("col_confidence", lang): lambda df: (df["confidence"] * 100).round(1).astype(str) + " %",
-               t("col_lift", lang): lambda df: df["lift"].round(2),
-           }))
+    category = st.selectbox(
+        t("recs_select", lang), sorted(recs["item_a"].unique()), format_func=lambda c: category_name(c, lang)
+    )
+    top = top_recommendations(recs, category, top_n=DEFAULT_TOP_N).assign(
+        **{
+            t("col_recommend", lang): lambda df: df["item_b"].map(lambda c: category_name(c, lang)),
+            t("col_together", lang): lambda df: df["together"].astype(int),
+            t("col_confidence", lang): lambda df: (df["confidence"] * 100).round(1).astype(str) + " %",
+            t("col_lift", lang): lambda df: df["lift"].round(2),
+        }
+    )
     if top.empty:
         st.warning(t("recs_empty", lang))
     else:
-        out_cols = [t("col_recommend", lang), t("col_together", lang),
-                    t("col_confidence", lang), t("col_lift", lang)]
+        out_cols = [t("col_recommend", lang), t("col_together", lang), t("col_confidence", lang), t("col_lift", lang)]
         st.dataframe(top[out_cols].reset_index(drop=True), width="stretch")
         best = top.iloc[0]
-        st.success(t("recs_conclusion", lang,
-                     cat=category_name(category, lang),
-                     rec=best[t("col_recommend", lang)],
-                     n=best[t("col_together", lang)],
-                     conf=best[t("col_confidence", lang)]))
+        st.success(
+            t(
+                "recs_conclusion",
+                lang,
+                cat=category_name(category, lang),
+                rec=best[t("col_recommend", lang)],
+                n=best[t("col_together", lang)],
+                conf=best[t("col_confidence", lang)],
+            )
+        )
         st.caption(t("recs_lift_caption", lang))
