@@ -96,6 +96,9 @@ python -m pytest tests
 
 ## Поддержка
 
+**Статус:** активно поддерживается (solo, некоммерческий проект). Изменения идут через PR
+с обязательным CI (tests / pipeline / solid).
+
 - Вопросы и баги — через [GitHub Issues](https://github.com/aby1ovva/marketplace-ai-clean/issues).
 - Уязвимости — приватно, см. [SECURITY.md](SECURITY.md) (или email `adina.abylova@gmail.com`).
 - Как контрибьютить — [CONTRIBUTING.md](CONTRIBUTING.md).

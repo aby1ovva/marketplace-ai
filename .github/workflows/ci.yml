@@ -44,3 +44,17 @@ jobs:
       # function-size) — the SOLID / single-responsibility gate.
       - run: ruff check src tests
       - run: ruff format --check src tests
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install pip-audit
+      # Scan the pinned requirements for known CVEs. Advisory (not a required
+      # merge gate), so a freshly-disclosed transitive CVE surfaces without
+      # blocking merges. Dependabot opens update PRs weekly (.github/dependabot.yml).
+      - run: pip-audit -r requirements.txt -r requirements-dev.txt

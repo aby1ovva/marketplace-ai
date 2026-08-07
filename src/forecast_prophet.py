@@ -14,7 +14,16 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from prophet import Prophet
 
-from config import BASELINE_METRICS, DAILY_HISTORY, DPI, FIG_DIR, FORECAST_FUTURE, MODEL_METRICS, REPORTS_DIR
+from config import (
+    BASELINE_METRICS,
+    DAILY_HISTORY,
+    DPI,
+    FIG_DIR,
+    FIG_PROPHET,
+    FORECAST_FUTURE,
+    MODEL_METRICS,
+    REPORTS_DIR,
+)
 from forecast_baseline import TEST_DAYS, load_daily_series, mape
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -65,14 +74,14 @@ def main():
             "interval": "Доверительный интервал",
             "y": "Позиций в день",
             "title": f"Prophet: прогноз на {TEST_DAYS} дней {mape_note}",
-            "file": "07_prophet_forecast.png",
+            "file": f"{FIG_PROPHET}.png",
         },
         "en": {
             "fact": "Actual",
             "interval": "Confidence interval",
             "y": "Items per day",
             "title": f"Prophet: {TEST_DAYS}-day forecast {mape_note}",
-            "file": "07_prophet_forecast_en.png",
+            "file": f"{FIG_PROPHET}_en.png",
         },
     }
     for L in chart_labels.values():

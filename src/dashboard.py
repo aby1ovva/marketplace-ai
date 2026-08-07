@@ -9,7 +9,18 @@
 import pandas as pd
 import streamlit as st
 
-from config import DASHBOARD_REQUIRED, DEFAULT_TOP_N, FIG_DIR, LANGS, LIFT_FLOOR, REPORTS_DIR
+from config import (
+    DASHBOARD_REQUIRED,
+    DEFAULT_TOP_N,
+    FIG_DIR,
+    FIG_DOW,
+    FIG_MONTHLY,
+    FIG_PROPHET,
+    FIG_TOP_CATS,
+    LANGS,
+    LIFT_FLOOR,
+    REPORTS_DIR,
+)
 from i18n import category_name, t
 from recommend import top_recommendations
 
@@ -64,11 +75,11 @@ def _render_about(lang):
     st.markdown(t("about_charts_header", lang))
     c1, c2 = st.columns(2)
     with c1:
-        st.image(fig_path("01_monthly_sales", lang), caption=t("caption_monthly", lang))
-        st.image(fig_path("03_day_of_week", lang), caption=t("caption_dow", lang))
+        st.image(fig_path(FIG_MONTHLY, lang), caption=t("caption_monthly", lang))
+        st.image(fig_path(FIG_DOW, lang), caption=t("caption_dow", lang))
     with c2:
-        st.image(fig_path("02_top_categories", lang), caption=t("caption_top_cats", lang))
-        st.image(fig_path("07_prophet_forecast", lang), caption=t("caption_prophet", lang))
+        st.image(fig_path(FIG_TOP_CATS, lang), caption=t("caption_top_cats", lang))
+        st.image(fig_path(FIG_PROPHET, lang), caption=t("caption_prophet", lang))
 
 
 def _render_forecast(lang):
