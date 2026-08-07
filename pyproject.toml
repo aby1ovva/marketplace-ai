@@ -1,0 +1,19 @@
+# Конфигурация тестов и покрытия. Packaging тут НЕ описываем (скрипты запускаются
+# напрямую, ruff-конфиг живёт в ruff.toml).
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing"
+markers = [
+    "slow: медленные тесты (обучение Prophet); в CI гоняются отдельным job",
+]
+
+[tool.coverage.run]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+# Замеренное покрытие быстрого набора (-m "not slow") = 84%.
+# Порог энфорсится в CI: `pytest -m "not slow" --cov-fail-under=80` (запас 4 п.п.).
+# Локально не гейтим, чтобы прогон подмножества тестов не падал по покрытию.
+# Ратчет 80 -> 85 по мере покрытия check_data.py / prepare_data.main / prophet.main.
