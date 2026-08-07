@@ -94,7 +94,16 @@ python -m pytest tests
 - [x] Этап 6 — Streamlit-дашборд (прогноз / тренды / рекомендации)
 - [x] Локализация дашборда RU/EN (переключатель вверху страницы, графики на обоих языках)
 
+## Поддержка
+
+- Вопросы и баги — через [GitHub Issues](https://github.com/aby1ovva/marketplace-ai-clean/issues).
+- Уязвимости — приватно, см. [SECURITY.md](SECURITY.md) (или email `adina.abylova@gmail.com`).
+- Как контрибьютить — [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Лицензия
 
-Код — [MIT](LICENSE). Датасет Olist распространяется отдельно на Kaggle под лицензией
+Код — [MIT](LICENSE). Датасет Olist распространяется на Kaggle под лицензией
 CC BY-NC-SA 4.0 и **в репозиторий не входит** — скачивается скриптом установки.
+Производные артефакты в `reports/` (CSV/JSON и графики) получены из данных Olist,
+поэтому на них распространяется CC BY-NC-SA 4.0 — см. [reports/README.md](reports/README.md).
+Это ориентир мейнтейнера, а не юридическое заключение.
