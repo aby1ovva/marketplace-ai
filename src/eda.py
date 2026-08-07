@@ -52,16 +52,8 @@ def save(fig, name):
     print(f"  график: reports/figures/{name}")
 
 
-def main():
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
-    sales = pd.read_csv(DATA_PATH, parse_dates=["date"])
-    sales["month"] = sales["date"].dt.to_period("M")
-
-    monthly = sales.groupby("month").agg(revenue=("price", "sum"), items=("order_id", "count"))
-    top_cats = sales.groupby("category")["price"].sum().nlargest(10) / 1000
-    dow = sales.groupby(sales["date"].dt.dayofweek)["price"].count()
-
-    # Графики 1-3 — на двух языках (используются в дашборде)
+def _bilingual_charts(monthly, top_cats, dow):
+    """Графики 1-3 на двух языках (используются в дашборде)."""
     for lang, L in CHART_LABELS.items():
         # 1. Продажи по месяцам (выручка и число позиций)
         fig, ax1 = plt.subplots(figsize=(11, 5))
@@ -90,6 +82,9 @@ def main():
         ax.set_title(L["dow_title"])
         save(fig, fig_name("03_day_of_week", lang))
 
+
+def _extra_charts(sales):
+    """Графики 4-5 (одна языковая версия): дневной ряд и динамика топ-5 категорий."""
     # 4. Дневной ряд продаж (основа будущего прогноза)
     daily = sales.groupby("date")["price"].count()
     fig, ax = plt.subplots(figsize=(11, 4))
@@ -112,7 +107,9 @@ def main():
     ax.tick_params(axis="x", rotation=60)
     save(fig, "05_top5_dynamics.png")
 
-    # Ключевые цифры
+
+def _print_findings(monthly, top_cats, dow):
+    """Ключевые цифры EDA в консоль."""
     print("\nКлючевые выводы:")
     dow_ru = dow.copy()
     dow_ru.index = CHART_LABELS["ru"]["dow_names"]
@@ -126,6 +123,20 @@ def main():
     sparse = monthly[monthly["items"] < 100]
     sparse_months = list(sparse.index.astype(str))
     print(f"- Месяцев с <100 продаж (нерепрезентативные, убрать из обучения): {len(sparse)}: {sparse_months}")
+
+
+def main():
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    sales = pd.read_csv(DATA_PATH, parse_dates=["date"])
+    sales["month"] = sales["date"].dt.to_period("M")
+
+    monthly = sales.groupby("month").agg(revenue=("price", "sum"), items=("order_id", "count"))
+    top_cats = sales.groupby("category")["price"].sum().nlargest(10) / 1000
+    dow = sales.groupby(sales["date"].dt.dayofweek)["price"].count()
+
+    _bilingual_charts(monthly, top_cats, dow)
+    _extra_charts(sales)
+    _print_findings(monthly, top_cats, dow)
 
 
 if __name__ == "__main__":

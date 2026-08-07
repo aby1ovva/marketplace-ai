@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,19 @@ jobs:
       # (incl. the light Prophet fit test) runs without installing cmdstan.
       - run: pytest -m "not slow" --cov-fail-under=80
 
-  quality:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      # Full pipeline end-to-end incl. Prophet training, on synthetic fixtures.
+      - run: pytest -m slow --no-cov
+
+  solid:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +40,7 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: pip install ruff==0.16.1
+      # Lint + format + design/complexity rules (bugbear, simplify, mccabe,
+      # function-size) — the SOLID / single-responsibility gate.
       - run: ruff check src tests
       - run: ruff format --check src tests
