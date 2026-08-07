@@ -9,7 +9,7 @@
 import pandas as pd
 import streamlit as st
 
-from config import DASHBOARD_REQUIRED, DEFAULT_TOP_N, FIG_DIR, LANGS, REPORTS_DIR
+from config import DASHBOARD_REQUIRED, DEFAULT_TOP_N, FIG_DIR, LANGS, LIFT_FLOOR, REPORTS_DIR
 from i18n import category_name, t
 from recommend import top_recommendations
 
@@ -169,7 +169,7 @@ def main():
         category = st.selectbox(
             t("recs_select", lang), sorted(recs["item_a"].unique()), format_func=lambda c: category_name(c, lang)
         )
-        top = top_recommendations(recs, category, top_n=DEFAULT_TOP_N).assign(
+        top = top_recommendations(recs, category, top_n=DEFAULT_TOP_N, min_lift=LIFT_FLOOR).assign(
             **{
                 t("col_recommend", lang): lambda df: df["item_b"].map(lambda c: category_name(c, lang)),
                 t("col_together", lang): lambda df: df["together"].astype(int),

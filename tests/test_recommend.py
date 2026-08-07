@@ -62,3 +62,28 @@ def test_recommend_min_lift_filters():
     stats = build_pair_stats(make_baskets())
     assert not top_recommendations(stats, "A").empty
     assert top_recommendations(stats, "A", min_lift=99).empty
+
+
+def make_lift_baskets():
+    """a↔c — настоящая связь (lift>1); a↔b — анти-корреляция (together есть, lift<1).
+
+    a,c ∈ o1-5 (together=5); b ∈ o4-10 (с a пересекается в 2 заказах).
+    lift(a→c)=(5/5)/(5/10)=2.0; lift(a→b)=(2/5)/(7/10)≈0.57.
+    """
+    rows = []
+    for o in ["o1", "o2", "o3", "o4", "o5"]:
+        rows += [{"order_id": o, "item": "a"}, {"order_id": o, "item": "c"}]
+    for o in ["o4", "o5", "o6", "o7", "o8", "o9", "o10"]:
+        rows.append({"order_id": o, "item": "b"})
+    return pd.DataFrame(rows)
+
+
+def test_recommend_excludes_lift_below_floor():
+    """Этап 4: рекомендуем только пары с lift > LIFT_FLOOR (связь сильнее случайной)."""
+    from config import LIFT_FLOOR
+
+    stats = build_pair_stats(make_lift_baskets())
+    recs = top_recommendations(stats, "a", min_lift=LIFT_FLOOR)
+    assert "c" in recs["item_b"].values  # настоящая связь остаётся
+    assert "b" not in recs["item_b"].values  # анти-коррелированная пара отсеяна
+    assert (recs["lift"] > LIFT_FLOOR).all()
