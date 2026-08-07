@@ -1,4 +1,5 @@
 """Тесты baseline-прогноза (этап 2)."""
+
 import sys
 from pathlib import Path
 

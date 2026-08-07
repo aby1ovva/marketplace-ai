@@ -4,13 +4,12 @@
 Колонки: date | order_id | product_id | category | price
 Только доставленные заказы (delivered), категории переведены на английский.
 """
+
 import sys
-from pathlib import Path
 
 import pandas as pd
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-OUT_PATH = DATA_DIR / "processed" / "sales.csv"
+from config import DATA_DIR, DATA_PATH
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -37,10 +36,10 @@ def main():
 
     mart = build_sales_mart(orders, items, products, translation)
 
-    OUT_PATH.parent.mkdir(exist_ok=True)
-    mart.to_csv(OUT_PATH, index=False)
+    DATA_PATH.parent.mkdir(exist_ok=True)
+    mart.to_csv(DATA_PATH, index=False)
 
-    print(f"Витрина сохранена: {OUT_PATH}")
+    print(f"Витрина сохранена: {DATA_PATH}")
     print(f"Строк: {len(mart):,} (позиций доставленных заказов)")
     print(f"Период: {mart.date.min():%Y-%m-%d} — {mart.date.max():%Y-%m-%d}")
     print(f"Товаров: {mart.product_id.nunique():,}, категорий: {mart.category.nunique()}")

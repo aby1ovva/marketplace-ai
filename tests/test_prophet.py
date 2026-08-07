@@ -1,4 +1,5 @@
 """Тесты подготовки данных для Prophet (этап 3). Само обучение в тестах не гоняем — долго."""
+
 import sys
 from pathlib import Path
 

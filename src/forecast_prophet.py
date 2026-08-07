@@ -3,21 +3,19 @@
 Тренд + недельная и годовая сезонность + бразильские праздники.
 Сравнение с baseline из reports/baseline_metrics.json (этап 2).
 """
+
 import json
 import logging
 import sys
-from pathlib import Path
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import pandas as pd
 from prophet import Prophet
 
+from config import BASELINE_METRICS, DAILY_HISTORY, DPI, FIG_DIR, FORECAST_FUTURE, MODEL_METRICS, REPORTS_DIR
 from forecast_baseline import TEST_DAYS, load_daily_series, mape
-
-REPORTS_DIR = Path(__file__).parent.parent / "reports"
 
 sys.stdout.reconfigure(encoding="utf-8")
 logging.getLogger("cmdstanpy").setLevel(logging.WARNING)
@@ -45,8 +43,11 @@ def main():
 
     forecast = fit_and_forecast(train, TEST_DAYS)
 
-    metrics = {"mape": round(mape(test, forecast["yhat"]), 2), "mae": round(float(abs(test - forecast["yhat"]).mean()), 1)}
-    baseline = json.loads((REPORTS_DIR / "baseline_metrics.json").read_text())
+    metrics = {
+        "mape": round(mape(test, forecast["yhat"]), 2),
+        "mae": round(float(abs(test - forecast["yhat"]).mean()), 1),
+    }
+    baseline = json.loads((REPORTS_DIR / BASELINE_METRICS).read_text())
     best_baseline = min(m["mape"] for m in baseline.values())
 
     print(f"\nProphet:        MAPE = {metrics['mape']:.1f}%, MAE = {metrics['mae']:.0f} позиций/день")
@@ -54,34 +55,49 @@ def main():
     verdict = "ЛУЧШЕ baseline" if metrics["mape"] < best_baseline else "НЕ лучше baseline"
     print(f"Вывод: Prophet {verdict} (разница {best_baseline - metrics['mape']:+.1f} п.п.)")
 
-    (REPORTS_DIR / "model_metrics.json").write_text(json.dumps({"prophet": metrics}, indent=2))
+    (REPORTS_DIR / MODEL_METRICS).write_text(json.dumps({"prophet": metrics}, indent=2))
 
     # График валидации — на двух языках (показывается в дашборде)
+    mape_note = f"(MAPE {metrics['mape']:.1f}% vs baseline {best_baseline:.1f}%)"
     chart_labels = {
-        "ru": {"fact": "Факт", "interval": "Доверительный интервал", "y": "Позиций в день",
-               "title": f"Prophet: прогноз на {TEST_DAYS} дней (MAPE {metrics['mape']:.1f}% vs baseline {best_baseline:.1f}%)",
-               "file": "07_prophet_forecast.png"},
-        "en": {"fact": "Actual", "interval": "Confidence interval", "y": "Items per day",
-               "title": f"Prophet: {TEST_DAYS}-day forecast (MAPE {metrics['mape']:.1f}% vs baseline {best_baseline:.1f}%)",
-               "file": "07_prophet_forecast_en.png"},
+        "ru": {
+            "fact": "Факт",
+            "interval": "Доверительный интервал",
+            "y": "Позиций в день",
+            "title": f"Prophet: прогноз на {TEST_DAYS} дней {mape_note}",
+            "file": "07_prophet_forecast.png",
+        },
+        "en": {
+            "fact": "Actual",
+            "interval": "Confidence interval",
+            "y": "Items per day",
+            "title": f"Prophet: {TEST_DAYS}-day forecast {mape_note}",
+            "file": "07_prophet_forecast_en.png",
+        },
     }
     for L in chart_labels.values():
         fig, ax = plt.subplots(figsize=(11, 5))
         daily.iloc[-90:].plot(ax=ax, color="steelblue", label=L["fact"])
         forecast["yhat"].plot(ax=ax, color="crimson", linewidth=1.8, label="Prophet")
-        ax.fill_between(forecast.index, forecast["yhat_lower"], forecast["yhat_upper"],
-                        color="crimson", alpha=0.15, label=L["interval"])
+        ax.fill_between(
+            forecast.index,
+            forecast["yhat_lower"],
+            forecast["yhat_upper"],
+            color="crimson",
+            alpha=0.15,
+            label=L["interval"],
+        )
         ax.set_ylabel(L["y"])
         ax.set_title(L["title"])
         ax.legend()
         fig.tight_layout()
-        fig.savefig(REPORTS_DIR / "figures" / L["file"], dpi=120)
+        fig.savefig(FIG_DIR / L["file"], dpi=DPI)
         print(f"График: reports/figures/{L['file']}")
 
     # Прогноз в будущее (за пределы данных) — обучение на всём ряде, читает дашборд
     future_fc = fit_and_forecast(daily, TEST_DAYS)
-    future_fc.round(1).to_csv(REPORTS_DIR / "forecast_future.csv")
-    daily.to_csv(REPORTS_DIR / "daily_history.csv")
+    future_fc.round(1).to_csv(REPORTS_DIR / FORECAST_FUTURE)
+    daily.to_csv(REPORTS_DIR / DAILY_HISTORY)
     print("Прогноз для дашборда: reports/forecast_future.csv")
 
 

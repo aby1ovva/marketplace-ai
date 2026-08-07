@@ -69,7 +69,6 @@ STRINGS = {
         "tab_forecast": "📈 Прогноз",
         "tab_trends": "🔥 Тренды",
         "tab_recs": "🛒 Покупают вместе",
-
         "about_orders": "Заказов в данных",
         "about_products": "Товаров",
         "about_categories": "Категорий",
@@ -105,14 +104,12 @@ STRINGS = {
             "Модель прогноза учитывает этот ритм."
         ),
         "caption_top_cats": (
-            "Крупнейшие категории по выручке: красота и здоровье, часы и подарки, "
-            "товары для спальни и ванной."
+            "Крупнейшие категории по выручке: красота и здоровье, часы и подарки, товары для спальни и ванной."
         ),
         "caption_prophet": (
             "Проверка модели: красная линия — прогноз, синяя — что было на самом деле. "
             "Модель поймала и тренд, и недельные колебания."
         ),
-
         "forecast_header": "Сколько будут покупать в ближайшие 28 дней",
         "forecast_info": (
             "📌 **Как читать:** синяя линия — реальные продажи в прошлом (штук в день), "
@@ -135,7 +132,6 @@ STRINGS = {
         "col_forecast": "прогноз, шт.",
         "col_min": "мин",
         "col_max": "макс",
-
         "trends_header": "Что взлетает, а что проседает",
         "trends_info": (
             "📌 **Как читать:** сравниваем продажи каждой категории за последние 28 дней с предыдущими 28 днями. "
@@ -151,7 +147,6 @@ STRINGS = {
         "trends_lagging": "**🐢 Отстающие**",
         "trends_chart_x": "категория",
         "trends_chart_y": "рост продаж, %",
-
         "recs_header": "Что покупают вместе",
         "recs_info": (
             "📌 **Как читать:** выбери категорию — система покажет, что покупатели чаще всего берут с ней "
@@ -183,7 +178,6 @@ STRINGS = {
         "tab_forecast": "📈 Forecast",
         "tab_trends": "🔥 Trends",
         "tab_recs": "🛒 Bought together",
-
         "about_orders": "Orders in dataset",
         "about_products": "Products",
         "about_categories": "Categories",
@@ -215,18 +209,13 @@ with what actually happened. The model was off by **20.9%** on average — while
             "The November 2017 peak is Black Friday."
         ),
         "caption_dow": (
-            "Weekly rhythm: most orders on Monday, fewest on Saturday. "
-            "The forecast model accounts for this rhythm."
+            "Weekly rhythm: most orders on Monday, fewest on Saturday. The forecast model accounts for this rhythm."
         ),
-        "caption_top_cats": (
-            "Top categories by revenue: health & beauty, watches & gifts, "
-            "bed, bath & table goods."
-        ),
+        "caption_top_cats": ("Top categories by revenue: health & beauty, watches & gifts, bed, bath & table goods."),
         "caption_prophet": (
             "Model validation: the red line is the forecast, the blue one is what actually happened. "
             "The model captured both the trend and the weekly swings."
         ),
-
         "forecast_header": "How much will be sold in the next 28 days",
         "forecast_info": (
             "📌 **How to read:** the blue line is actual past sales (items per day), "
@@ -245,15 +234,14 @@ with what actually happened. The model was off by **20.9%** on average — while
         "legend_fact": "Actual (past)",
         "legend_forecast": "Forecast (future)",
         "expander_table": "Day-by-day forecast — table",
-        "expander_caption": "\"min\" and \"max\" form the uncertainty band: the real value will most likely fall inside it.",
+        "expander_caption": '"min" and "max" form the uncertainty band: the real value will most likely fall inside it.',
         "col_forecast": "forecast, items",
         "col_min": "min",
         "col_max": "max",
-
         "trends_header": "What is taking off and what is slowing down",
         "trends_info": (
             "📌 **How to read:** we compare each category's sales over the last 28 days with the previous 28 days. "
-            "+100% means sales doubled. The whole market is growing, so \"lagging\" doesn't always mean decline — "
+            '+100% means sales doubled. The whole market is growing, so "lagging" doesn\'t always mean decline — '
             "just slower growth. Practical meaning: green — where a seller should enter, "
             "red — where not to increase stock."
         ),
@@ -265,12 +253,11 @@ with what actually happened. The model was off by **20.9%** on average — while
         "trends_lagging": "**🐢 Lagging**",
         "trends_chart_x": "category",
         "trends_chart_y": "sales growth, %",
-
         "recs_header": "What is bought together",
         "recs_info": (
             "📌 **How to read:** pick a category — the system shows what buyers most often add to the same order. "
-            "This is the \"Frequently bought together\" block you see on marketplaces. "
-            "**Confidence** is the probability of a joint purchase: 74% means \"3 out of 4 buyers take this too\". "
+            'This is the "Frequently bought together" block you see on marketplaces. '
+            '**Confidence** is the probability of a joint purchase: 74% means "3 out of 4 buyers take this too". '
             "**Lift** above 1 means the link is not random."
         ),
         "recs_select": "The buyer put in the cart:",
@@ -280,7 +267,7 @@ with what actually happened. The model was off by **20.9%** on average — while
         "col_lift": "Lift",
         "recs_empty": "Too few joint purchases for this category — no recommendations.",
         "recs_conclusion": (
-            "💡 Takeaway: alongside \"{cat}\" it pays to offer \"{rec}\" — "
+            '💡 Takeaway: alongside "{cat}" it pays to offer "{rec}" — '
             "they were bought together {n} times ({conf} of buyers take both)."
         ),
         "recs_lift_caption": "lift > 1 — the link is stronger than chance (among orders with 2+ items)",

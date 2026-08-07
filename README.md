@@ -32,34 +32,55 @@ AI-система аналитики для маркетплейса: **прог
 ## Структура
 
 - `data/` — CSV-файлы датасета (не в git, скачиваются скриптом)
-- `notebooks/` — Jupyter-ноутбуки для анализа (EDA, эксперименты с моделями)
-- `src/` — Python-скрипты (подготовка данных, модели, дашборд)
+- `src/` — Python-скрипты (подготовка данных, модели, дашборд); константы вынесены в `src/config.py`
+- `reports/` — готовые артефакты (CSV/JSON + графики). Регенерируются скриптами пайплайна;
+  графики `07_prophet_forecast` и `08_trends` намеренно хранятся в git как демонстрация в этом README.
 
 ## Установка
 
+Требуется **Python 3.14**. Зависимости закреплены в `requirements.txt` (runtime) и
+`requirements-dev.txt` (тесты + линтер).
+
+**Windows (PowerShell):**
+
 ```powershell
 python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-.venv\Scripts\python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
+.venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt
+python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
 ```
+
+**Linux / macOS:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+make install-dev   # или: pip install -r requirements-dev.txt
+python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
+```
+
+> Только для работы приложения (без тестов) достаточно `pip install -r requirements.txt`.
 
 ## Запуск
 
-Пересчёт всех артефактов (по порядку), затем дашборд:
+Пересчёт всех артефактов по порядку, затем дашборд. На Linux/macOS одной командой:
+`make run-pipeline` и `make run-dashboard`.
+
+**Windows (PowerShell):**
 
 ```powershell
-.venv\Scripts\python src\prepare_data.py      # витрина продаж
-.venv\Scripts\python src\forecast_baseline.py # baseline-метрики
-.venv\Scripts\python src\forecast_prophet.py  # модель + прогноз на 28 дней
-.venv\Scripts\python src\trends.py            # тренды категорий
-.venv\Scripts\python src\recommend.py         # «покупают вместе»
-.venv\Scripts\streamlit run src\dashboard.py  # дашборд: http://localhost:8501
+python src\prepare_data.py      # витрина продаж
+python src\forecast_baseline.py # baseline-метрики
+python src\forecast_prophet.py  # модель + прогноз на 28 дней
+python src\trends.py            # тренды категорий
+python src\recommend.py         # «покупают вместе»
+streamlit run src\dashboard.py  # дашборд: http://localhost:8501
 ```
 
-Тесты:
+Тесты (`make test` на Linux/macOS):
 
 ```powershell
-.venv\Scripts\python -m pytest tests
+python -m pytest tests
 ```
 
 ## Этапы проекта
@@ -73,7 +94,16 @@ python -m venv .venv
 - [x] Этап 6 — Streamlit-дашборд (прогноз / тренды / рекомендации)
 - [x] Локализация дашборда RU/EN (переключатель вверху страницы, графики на обоих языках)
 
+## Поддержка
+
+- Вопросы и баги — через [GitHub Issues](https://github.com/aby1ovva/marketplace-ai-clean/issues).
+- Уязвимости — приватно, см. [SECURITY.md](SECURITY.md) (или email `adina.abylova@gmail.com`).
+- Как контрибьютить — [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Лицензия
 
-Код — [MIT](LICENSE). Датасет Olist распространяется отдельно на Kaggle под лицензией
+Код — [MIT](LICENSE). Датасет Olist распространяется на Kaggle под лицензией
 CC BY-NC-SA 4.0 и **в репозиторий не входит** — скачивается скриптом установки.
+Производные артефакты в `reports/` (CSV/JSON и графики) получены из данных Olist,
+поэтому на них распространяется CC BY-NC-SA 4.0 — см. [reports/README.md](reports/README.md).
+Это ориентир мейнтейнера, а не юридическое заключение.

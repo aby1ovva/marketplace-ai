@@ -1,0 +1,16 @@
+# Ruff config for marketplace-ai.
+line-length = 120
+target-version = "py313"
+
+[lint]
+# E/F/I/W/UP — style, bugs, imports, pycodestyle, pyupgrade.
+# B/SIM — flake8-bugbear + simplify. C901 + PLR09xx — complexity / function-size
+# gates (SOLID / single-responsibility proxy).
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915"]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.per-file-ignores]
+# i18n.py holds long user-facing RU/EN copy and markdown tables — kept intact.
+"src/i18n.py" = ["E501"]
