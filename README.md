@@ -37,29 +37,49 @@ AI-система аналитики для маркетплейса: **прог
 
 ## Установка
 
+Требуется **Python 3.14**. Зависимости закреплены в `requirements.txt` (runtime) и
+`requirements-dev.txt` (тесты + линтер).
+
+**Windows (PowerShell):**
+
 ```powershell
 python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-.venv\Scripts\python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
+.venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt
+python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
 ```
+
+**Linux / macOS:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+make install-dev   # или: pip install -r requirements-dev.txt
+python -c "import kagglehub, shutil, pathlib; p = kagglehub.dataset_download('olistbr/brazilian-ecommerce'); [shutil.copy(f, 'data') for f in pathlib.Path(p).glob('*.csv')]"
+```
+
+> Только для работы приложения (без тестов) достаточно `pip install -r requirements.txt`.
 
 ## Запуск
 
-Пересчёт всех артефактов (по порядку), затем дашборд:
+Пересчёт всех артефактов по порядку, затем дашборд. На Linux/macOS одной командой:
+`make run-pipeline` и `make run-dashboard`.
+
+**Windows (PowerShell):**
 
 ```powershell
-.venv\Scripts\python src\prepare_data.py      # витрина продаж
-.venv\Scripts\python src\forecast_baseline.py # baseline-метрики
-.venv\Scripts\python src\forecast_prophet.py  # модель + прогноз на 28 дней
-.venv\Scripts\python src\trends.py            # тренды категорий
-.venv\Scripts\python src\recommend.py         # «покупают вместе»
-.venv\Scripts\streamlit run src\dashboard.py  # дашборд: http://localhost:8501
+python src\prepare_data.py      # витрина продаж
+python src\forecast_baseline.py # baseline-метрики
+python src\forecast_prophet.py  # модель + прогноз на 28 дней
+python src\trends.py            # тренды категорий
+python src\recommend.py         # «покупают вместе»
+streamlit run src\dashboard.py  # дашборд: http://localhost:8501
 ```
 
-Тесты:
+Тесты (`make test` на Linux/macOS):
 
 ```powershell
-.venv\Scripts\python -m pytest tests
+python -m pytest tests
 ```
 
 ## Этапы проекта

@@ -3,3 +3,30 @@ data/**/*.csv
 __pycache__/
 .ipynb_checkpoints/
 *.pyc
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+logs/
+
+# tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# build artifacts
+build/
+dist/
+*.egg-info/

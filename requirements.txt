@@ -1,7 +1,9 @@
-pandas
-matplotlib
-jupyter
-kagglehub
-pytest
-prophet
-streamlit
+# Runtime dependencies — pinned to versions verified on Python 3.14 (all 28 tests green).
+# Dev / test / lint tools live in requirements-dev.txt.
+# Update deliberately, then re-run the test suite before committing.
+kagglehub==1.0.2
+matplotlib==3.10.9
+numpy==2.4.6
+pandas==3.0.3
+prophet==1.3.0
+streamlit==1.58.0
